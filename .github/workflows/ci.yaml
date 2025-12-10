@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: CI step for node ${{ matrix.node-version }}
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - name: Checkout main branch for tests purposes
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: main
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node ${{ matrix.node-version }}
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: yarn install
+        run: yarn install --immutable
+
+      - name: run checks
+        run: |
+          yarn tsc:full
+          yarn lint:all --max-warnings 0
+          yarn prettier:check
+          yarn test:all
+
+      - name: validate config
+        run: yarn backstage-cli config:check --lax
+
+      - name: build all packages
+        run: yarn backstage-cli repo build --all
+
+  verify:
+    name: Verify step
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout head branch
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: 22.x
+          cache: 'yarn'
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Verify lockfile duplicates
+        run: yarn dedupe --strategy highest --check
+
+  reports:
+    name: Reports step
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout head branch
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: 22.x
+          cache: 'yarn'
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Api reports
+        run: yarn build:api-reports
+
+      - name: Knip reports
+        run: yarn build:knip-reports
+
+  result:
+    if: ${{ always() }}
+    name: check all required jobs
+    runs-on: ubuntu-24.04
+    needs: [ci, verify, reports]
+    steps:
+      - run: exit 1
+        if: >-
+          ${{
+               contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+            || contains(needs.*.result, 'skipped')
+          }}
