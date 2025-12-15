@@ -1,0 +1,65 @@
+name: Update Backstage
+
+on:
+  push:
+    branches:
+      - renovate/backstage-monorepo
+    paths:
+      - backstage.json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    name: Bump Backstage versions
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: 22.x
+          cache: yarn
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Bump Backstage dependencies
+        run: |
+          BACKSTAGE_VERSION=$(node -p "require('./backstage.json').version")
+          echo "Bumping to Backstage $BACKSTAGE_VERSION"
+          yarn backstage-cli versions:bump --release "$BACKSTAGE_VERSION" --skip-install
+
+      - name: Install updated dependencies
+        run: yarn install
+
+      - name: Dedupe lockfile
+        run: |
+          yarn dedupe --strategy highest
+          yarn dedupe --strategy highest --check
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore(deps): bump Backstage'
+          title: 'chore(deps): bump Backstage'
+          body: 'Automated Backstage dependency bump via `yarn backstage-cli versions:bump`.'
+          branch: 'chore/backstage-bump'
+          delete-branch: true
+          add-paths: |
+            backstage.json
+            package.json
+            packages/**/package.json
+            plugins/**/package.json
+            yarn.lock
