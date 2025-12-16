@@ -3,7 +3,6 @@ import {
   createBackendPlugin,
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './router';
-import { todoListServiceRef } from './services/TodoListService';
 
 /**
  * analyticsLensPlugin backend plugin
@@ -17,13 +16,11 @@ export const analyticsLensPlugin = createBackendPlugin({
       deps: {
         httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
-        todoList: todoListServiceRef,
       },
-      async init({ httpAuth, httpRouter, todoList }) {
+      async init({ httpAuth, httpRouter }) {
         httpRouter.use(
           await createRouter({
             httpAuth,
-            todoList,
           }),
         );
       },
