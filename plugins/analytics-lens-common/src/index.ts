@@ -5,15 +5,4 @@
  * @packageDocumentation
  */
 
-/**
- * In this package you might for example declare types that are common
- * between the frontend and backend plugin packages.
- */
-export type CommonType = {
-  field: string;
-};
-
-/**
- * Or you might declare some common constants.
- */
-export const COMMON_CONSTANT = 1;
+export const WINDOW_SESSION_ID_STORAGE_KEY = 'analytics-lens.sessionId';
