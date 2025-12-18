@@ -8,6 +8,7 @@ import { FetchApi } from '../types/fetch';
 import crossFetch from 'cross-fetch';
 import { pluginId } from '../pluginId';
 import * as parser from 'uri-template';
+import { EventPayload } from '../models/EventPayload.model';
 import { HealthGet200Response } from '../models/HealthGet200Response.model';
 
 /**
@@ -30,6 +31,12 @@ export interface RequestOptions {
 /**
  * @public
  */
+export type EventsPost = {
+  body: Array<EventPayload>;
+};
+/**
+ * @public
+ */
 export type HealthGet = {};
 
 /**
@@ -45,6 +52,31 @@ export class DefaultApiClient {
   }) {
     this.discoveryApi = options.discoveryApi;
     this.fetchApi = options.fetchApi || { fetch: crossFetch };
+  }
+
+  /**
+   * Accepts a batch of analytics events from the frontend
+   * @param eventPayload -
+   */
+  public async eventsPost(
+    // @ts-ignore
+    request: EventsPost,
+    options?: RequestOptions,
+  ): Promise<TypedResponse<void>> {
+    const baseUrl = await this.discoveryApi.getBaseUrl(pluginId);
+
+    const uriTemplate = `/events`;
+
+    const uri = parser.parse(uriTemplate).expand({});
+
+    return await this.fetchApi.fetch(`${baseUrl}${uri}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.token && { Authorization: `Bearer ${options?.token}` }),
+      },
+      method: 'POST',
+      body: JSON.stringify(request.body),
+    });
   }
 
   /**

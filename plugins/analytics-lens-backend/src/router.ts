@@ -14,5 +14,9 @@ export async function createRouter({
     res.status(200).json({ status: 'ok' });
   });
 
+  router.post('/events', async (_req, res) => {
+    res.status(204).end();
+  });
+
   return router;
 }
