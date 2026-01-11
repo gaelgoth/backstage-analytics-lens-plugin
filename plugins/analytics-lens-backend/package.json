@@ -28,7 +28,10 @@
     "@backstage/backend-defaults": "^0.14.0",
     "@backstage/backend-openapi-utils": "^0.6.4",
     "@backstage/backend-plugin-api": "^1.6.0",
-    "express": "^4.17.1"
+    "@internal/backstage-plugin-analytics-lens-common": "workspace:^",
+    "express": "^4.17.1",
+    "fastq": "^1.20.1",
+    "knex": "^3.1.0"
   },
   "devDependencies": {
     "@backstage/backend-test-utils": "^1.10.2",

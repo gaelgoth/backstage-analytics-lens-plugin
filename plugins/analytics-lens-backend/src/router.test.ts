@@ -10,8 +10,13 @@ describe('createRouter', () => {
   let app: express.Express | Server;
 
   beforeEach(async () => {
+    const eventsService = {
+      persistEvent: jest.fn(),
+    };
     const router = await createRouter({
       httpAuth: mockServices.httpAuth(),
+      logger: mockServices.logger.mock(),
+      eventsService: eventsService as any,
     });
     app = wrapInOpenApiTestServer(
       express().use(router).use(mockErrorHandler()),
