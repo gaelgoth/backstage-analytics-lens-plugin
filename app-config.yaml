@@ -12,11 +12,6 @@ app:
     - nav-item:catalog: false
     - nav-item:scaffolder: false
 
-    # Configure the catalog index page to be the root page, this is normally mounted on /catalog
-    - page:catalog:
-        config:
-          path: /
-
 organization:
   name: My Company
 

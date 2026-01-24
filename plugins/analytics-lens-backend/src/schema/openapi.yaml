@@ -24,3 +24,79 @@ paths:
                 properties:
                   status:
                     type: string
+
+  /events:
+    post:
+      description: Accepts a batch of analytics events from the frontend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EventPayload'
+            example:
+              - action: navigate
+                subject: /
+                attributes: {}
+                context:
+                  pluginId: app
+                  extensionId: app
+                userEntityRef: user:development/guest
+                sessionId: e9d7daa1-6ee1-4fad-98f3-125cda2a0560
+                timestamp: '2026-01-10T15:18:28.646Z'
+      responses:
+        '204':
+          description: Accepted
+
+components:
+  schemas:
+    EventPayload:
+      type: object
+      additionalProperties: {}
+      required:
+        - action
+        - subject
+        - context
+        - userEntityRef
+        - sessionId
+        - timestamp
+      example:
+        action: navigate
+        subject: /
+        attributes: {}
+        context:
+          pluginId: app
+          extensionId: app
+        userEntityRef: user:development/guest
+        sessionId: e9d7daa1-6ee1-4fad-98f3-125cda2a0560
+        timestamp: '2026-01-10T15:18:28.646Z'
+      properties:
+        action:
+          type: string
+        subject:
+          type: string
+        value:
+          type: number
+        attributes:
+          type: object
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: boolean
+              - type: number
+        context:
+          type: object
+          additionalProperties: {}
+          properties:
+            pluginId:
+              type: string
+            extensionId:
+              type: string
+        userEntityRef:
+          type: string
+        sessionId:
+          type: string
+        timestamp:
+          type: string
