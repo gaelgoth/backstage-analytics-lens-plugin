@@ -6882,7 +6882,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/material@npm:^5.12.2":
+"@mui/material@npm:^5.0.0, @mui/material@npm:^5.12.2":
   version: 5.18.0
   resolution: "@mui/material@npm:5.18.0"
   dependencies:
@@ -13845,8 +13845,8 @@ __metadata:
     "@backstage/plugin-user-settings": "npm:^0.8.30"
     "@backstage/ui": "npm:^0.10.0"
     "@internal/backstage-plugin-app-module-analytics-lens": "workspace:^"
-    "@material-ui/core": "npm:^4.12.2"
     "@material-ui/icons": "npm:^4.9.1"
+    "@mui/material": "npm:^5.0.0"
     "@playwright/test": "npm:^1.32.3"
     "@remixicon/react": "npm:^4.6.0"
     "@testing-library/dom": "npm:^9.0.0"
