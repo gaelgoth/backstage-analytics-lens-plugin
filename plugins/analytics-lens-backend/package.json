@@ -25,18 +25,18 @@
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
-    "@backstage/backend-defaults": "^0.14.0",
-    "@backstage/backend-openapi-utils": "^0.6.4",
-    "@backstage/backend-plugin-api": "^1.6.0",
+    "@backstage/backend-defaults": "^0.15.1",
+    "@backstage/backend-openapi-utils": "^0.6.5",
+    "@backstage/backend-plugin-api": "^1.6.2",
     "@internal/backstage-plugin-analytics-lens-common": "workspace:^",
     "express": "^4.17.1",
     "fastq": "^1.20.1",
     "knex": "^3.1.0"
   },
   "devDependencies": {
-    "@backstage/backend-test-utils": "^1.10.2",
-    "@backstage/cli": "^0.35.1",
-    "@backstage/repo-tools": "^0.16.1",
+    "@backstage/backend-test-utils": "^1.10.4",
+    "@backstage/cli": "^0.35.3",
+    "@backstage/repo-tools": "^0.16.3",
     "@types/express": "^4.17.6",
     "@types/supertest": "^2.0.12",
     "@useoptic/optic": "^1.0.9",
