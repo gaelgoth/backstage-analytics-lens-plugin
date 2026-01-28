@@ -1,4 +1,3 @@
-/***/
 /**
  * Common functionalities for the analytics-lens plugin.
  *
@@ -6,14 +5,11 @@
  */
 
 /**
- * In this package you might for example declare types that are common
- * between the frontend and backend plugin packages.
+ * The storage key used to store the analytics lens session ID in the window session storage.
+ * @public
  */
-export type CommonType = {
-  field: string;
-};
+export const WINDOW_SESSION_ID_STORAGE_KEY = 'analytics-lens.sessionId';
 
-/**
- * Or you might declare some common constants.
- */
-export const COMMON_CONSTANT = 1;
+export type { EventPayload } from './schema/openapi';
+
+export * from './schema/openapi';

@@ -1,0 +1,112 @@
+import { resolvePackagePath } from '@backstage/backend-plugin-api';
+import { TestDatabases } from '@backstage/backend-test-utils';
+import { EventsDatabase } from './EventsDatabase';
+
+const migrationsDir = resolvePackagePath(
+  '@internal/backstage-plugin-analytics-lens-backend',
+  'migrations',
+);
+
+type EventPayload = {
+  action: string;
+  subject: string;
+  attributes?: Record<string, any>;
+  context: Record<string, any>; // Relaxed type for test convenience
+  userEntityRef: string;
+  sessionId: string;
+  timestamp: string;
+  [key: string]: any;
+};
+
+describe('EventsDatabase', () => {
+  const databases = TestDatabases.create();
+
+  it.each(databases.eachSupportedId())(
+    'should insert events on %p',
+    async databaseId => {
+      const knex = await databases.init(databaseId);
+      await knex.migrate.latest({
+        directory: migrationsDir,
+      });
+      const eventsDatabase = new EventsDatabase(knex);
+
+      const events: EventPayload[] = [
+        {
+          action: 'navigate',
+          subject: '/',
+          attributes: { foo: 'bar' },
+          context: { pluginId: 'app', extensionId: 'app' },
+          userEntityRef: 'user:development/guest',
+          sessionId: 'test-session',
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      await eventsDatabase.insertEvents(events);
+
+      const dbEvents = await knex('events').select('*');
+      expect(dbEvents).toHaveLength(1);
+      expect(dbEvents[0]).toMatchObject({
+        action: 'navigate',
+        subject: '/',
+        session_id: 'test-session',
+      });
+      expect(JSON.parse(dbEvents[0].attributes)).toEqual({ foo: 'bar' });
+      expect(JSON.parse(dbEvents[0].context)).toEqual({
+        pluginId: 'app',
+        extensionId: 'app',
+      });
+    },
+  );
+
+  it.each(databases.eachSupportedId())(
+    'should insert multiple events on %p',
+    async databaseId => {
+      const knex = await databases.init(databaseId);
+      await knex.migrate.latest({
+        directory: migrationsDir,
+      });
+      const eventsDatabase = new EventsDatabase(knex);
+
+      const events: EventPayload[] = [
+        {
+          action: 'click',
+          subject: 'button-1',
+          attributes: {},
+          context: { pluginId: 'app' },
+          userEntityRef: 'user:default/user1',
+          sessionId: 'session-1',
+          timestamp: new Date().toISOString(),
+        },
+        {
+          action: 'hover',
+          subject: 'button-2',
+          attributes: { key: 'value' },
+          context: { pluginId: 'catalog' },
+          userEntityRef: 'user:default/user2',
+          sessionId: 'session-2',
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      await eventsDatabase.insertEvents(events);
+
+      const dbEvents = await knex('events').select('*').orderBy('id');
+      expect(dbEvents).toHaveLength(2);
+
+      expect(dbEvents[0]).toMatchObject({
+        action: 'click',
+        subject: 'button-1',
+        session_id: 'session-1',
+      });
+      expect(JSON.parse(dbEvents[0].context)).toEqual({ pluginId: 'app' });
+
+      expect(dbEvents[1]).toMatchObject({
+        action: 'hover',
+        subject: 'button-2',
+        session_id: 'session-2',
+      });
+      expect(JSON.parse(dbEvents[1].attributes)).toEqual({ key: 'value' });
+    },
+  );
+});
