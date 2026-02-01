@@ -41,15 +41,17 @@ export class EventsQueue {
     }
   }
 
-  flush(): void {
+  async flush(): Promise<void> {
     if (this.buffer.length === 0) {
       return;
     }
     this.logger.debug(`Flushing ${this.buffer.length} events to queue`);
     const eventsToPersist = [...this.buffer];
     this.buffer = [];
-    this.queue.push({ events: eventsToPersist }).catch(err => {
+    try {
+      await this.queue.push({ events: eventsToPersist });
+    } catch (err) {
       this.logger.error(`Failed to push to queue: ${err}`);
-    });
+    }
   }
 }
