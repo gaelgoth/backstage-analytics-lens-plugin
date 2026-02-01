@@ -34,7 +34,7 @@ export class EventsService {
       frequency: { seconds: 5 },
       timeout: { seconds: 15 },
       fn: async () => {
-        this.queue.flush();
+        await this.queue.flush();
       },
       scope: 'local',
     });

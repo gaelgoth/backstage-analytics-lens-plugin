@@ -1,9 +1,22 @@
 import { EventPayload } from '@internal/backstage-plugin-analytics-lens-common';
 import { Knex } from 'knex';
+import { DateTime } from 'luxon';
 
 const eventsTable = 'events';
 
-type DbEvents = {
+const eventsColumns = [
+  'id',
+  'action',
+  'subject',
+  'attributes',
+  'context',
+  'user_entity_ref',
+  'session_id',
+  'timestamp',
+  'created_at',
+] as const;
+
+export type DbEvents = {
   id: number;
   action: string;
   subject: string;
@@ -11,8 +24,8 @@ type DbEvents = {
   context: string;
   user_entity_ref: string;
   session_id: string;
-  timestamp: Date;
-  created_at: Date;
+  timestamp: string;
+  created_at: string;
 };
 
 const EventsToDb = (
@@ -24,7 +37,7 @@ const EventsToDb = (
   context: JSON.stringify(event.context),
   user_entity_ref: event.userEntityRef,
   session_id: event.sessionId,
-  timestamp: new Date(event.timestamp),
+  timestamp: DateTime.fromISO(event.timestamp).toSQLDate()!,
 });
 
 /**
@@ -35,11 +48,13 @@ const EventsToDb = (
 export class EventsDatabase {
   constructor(private readonly db: Knex) {}
 
-  async insertEvents(events: EventPayload[]): Promise<void> {
+  async insertEvents(events: EventPayload[]): Promise<DbEvents[]> {
     if (events.length === 0) {
-      return;
+      return [];
     }
     const dbEvents = events.map(EventsToDb);
-    await this.db(eventsTable).insert(dbEvents);
+    return this.db<DbEvents>(eventsTable)
+      .insert(dbEvents)
+      .returning(eventsColumns);
   }
 }

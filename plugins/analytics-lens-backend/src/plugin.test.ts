@@ -38,9 +38,7 @@ describe('analyticsLensPlugin', () => {
       .send(events)
       .expect(204);
 
-    // Wait for async flush - this is a bit flaky without exposing internals or waiting
-    // In a real integration test, we might want to check the DB content
-    await scheduler.triggerTask('analytics-lens_events_flush');
+    await scheduler.triggerTask('analytics-lens_events_queue_flush');
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
