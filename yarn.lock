@@ -12009,12 +12009,12 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:^18":
-  version: 18.3.27
-  resolution: "@types/react@npm:18.3.27"
+  version: 18.3.32
+  resolution: "@types/react@npm:18.3.32"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.2.2"
-  checksum: 10c0/a761d2f58de03d0714806cc65d32bb3d73fb33a08dd030d255b47a295e5fff2a775cf1c20b786824d8deb6454eaccce9bc6998d9899c14fc04bbd1b0b0b72897
+  checksum: 10c0/4ac8a939934a6e342a3bf071347b1ed48d0bd05ec0d97824cb08a8a8a63a3a7bbf3198e0b4a1c797508e5e065bebdf70d4eecdb49367cc2b254cf25924e87858
   languageName: node
   linkType: hard
 
